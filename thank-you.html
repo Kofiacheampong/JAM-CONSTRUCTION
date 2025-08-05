@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - JAM Construction</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta http-equiv="refresh" content="5;url=https://jamconst.com">
+    
+    <!-- Google Analytics Event -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_TRACKING_ID');
+        
+        // Track conversion
+        gtag('event', 'conversion', {
+            'send_to': 'AW-CONVERSION_ID/CONVERSION_LABEL',
+            'value': 1,
+            'currency': 'USD'
+        });
+    </script>
+</head>
+<body>
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
+        <div style="max-width: 600px;">
+            <h1 style="color: #1e3a8a; margin-bottom: 1rem;">Thank You!</h1>
+            
+            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h2 style="color: #1e3a8a; margin-bottom: 1rem;">Your estimate request has been received</h2>
+                
+                <p style="font-size: 1.125rem; margin-bottom: 1.5rem; color: #6b7280;">
+                    We'll review your project details and contact you within <strong>24 hours</strong>.
+                </p>
+                
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                    <h3 style="color: #1e3a8a; margin-bottom: 1rem;">What happens next:</h3>
+                    <ul style="text-align: left; color: #6b7280; line-height: 1.6;">
+                        <li>✓ We review your project requirements (within 4 hours)</li>
+                        <li>✓ Our estimator calls you to discuss details (within 24 hours)</li>
+                        <li>✓ We prepare your detailed estimate (within 48 hours)</li>
+                        <li>✓ You receive a professional estimate document via email</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #1e3a8a; color: white; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                    <p style="margin: 0; font-weight: 600;">Need immediate assistance?</p>
+                    <p style="margin: 0.5rem 0 0 0;">Call us at <a href="tel:+1-612-XXX-XXXX" style="color: white; text-decoration: underline;">(612) XXX-XXXX</a></p>
+                </div>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 0.875rem;">
+                You'll be redirected to our homepage in 5 seconds, or 
+                <a href="https://jamconst.com" style="color: #1e3a8a;">click here to return now</a>.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Track page view -->
+    <script>
+        gtag('event', 'page_view', {
+            'page_title': 'Thank You Page',
+            'page_location': window.location.href
+        });
+    </script>
+</body>
+</html>

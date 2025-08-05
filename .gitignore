@@ -1,0 +1,10 @@
+.env 
+/node_modules
+/dist
+/.idea
+/.vscode
+/src
+/.cache
+/.DS_Store
+/.eslintcache
+leadautomation.md
