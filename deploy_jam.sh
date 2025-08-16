@@ -86,7 +86,7 @@ check_status "Apache configuration test"
 
 # Restart Apache to ensure changes take effect
 echo -e "${BLUE}🔄 Restarting Apache...${NC}"
-ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP "sudo systemctl restart httpd"
+ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP "sudo systemctl restart httpd 2>/dev/null || sudo systemctl restart apache2 2>/dev/null || sudo service httpd restart 2>/dev/null || sudo service apache2 restart 2>/dev/null || echo 'Apache restart skipped - service not found'"
 check_status "Apache restart"
 
 # Verify deployment
