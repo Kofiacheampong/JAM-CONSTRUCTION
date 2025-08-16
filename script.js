@@ -332,19 +332,13 @@
         });
     }
     
-    // Navbar Scroll Effect
+    // Navbar Scroll Effect (removed background color changes)
     function setupNavbarScrollEffect() {
         const navbar = document.querySelector('.navbar');
         let lastScrollY = window.scrollY;
         
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY;
-            
-            if (currentScrollY > 100) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
             
             // Hide/show navbar on scroll
             if (currentScrollY > lastScrollY && currentScrollY > 300) {
@@ -506,10 +500,6 @@ const additionalStyles = `
     background-color: var(--primary-color);
 }
 
-.navbar.scrolled {
-    background: rgba(30, 58, 138, 0.95);
-    backdrop-filter: blur(20px);
-}
 
 @media (max-width: 768px) {
     .nav-menu.active {
