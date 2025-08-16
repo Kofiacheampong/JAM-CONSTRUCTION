@@ -3,13 +3,10 @@ name: Deploy JAM Construction Website
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     
     steps:
     - name: Checkout code
@@ -20,6 +17,7 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
+        chmod 700 ~/.ssh
         ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
         
     - name: Deploy to server
@@ -27,7 +25,13 @@ jobs:
         SERVER_IP: ${{ secrets.SERVER_IP }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
       run: |
+        echo "🚀 Starting deployment to $SERVER_USER@$SERVER_IP"
+        
+        # Test SSH connection
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP 'echo "✅ SSH connection successful"'
+        
         # Upload files to server
+        echo "📤 Uploading files..."
         rsync -avz --progress --exclude='.git' --exclude='.github' --exclude='*.sh' --exclude='*.md' --exclude='node_modules' -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" ./ $SERVER_USER@$SERVER_IP:/home/opc/website-update/
         
         # Deploy on server
