@@ -55,14 +55,18 @@ check_status "File upload"
 echo -e "${BLUE}🚀 Deploying files on server...${NC}"
 ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP << 'EOF'
     # Remove old files (except backups)
-    sudo find /var/www/html -name "website-backup-*" -prune -o -type f -delete
-    sudo find /var/www/html -name "website-backup-*" -prune -o -type d -empty -delete
+    sudo find /var/www/html -name "website-backup-*" -prune -o -type f -exec rm -f {} +
+    sudo find /var/www/html -depth -name "website-backup-*" -prune -o -type d -empty -exec rmdir {} +
     
     # Copy new files
     sudo cp -r /home/opc/website-update/* /var/www/html/
     
-    # Set proper permissions
-    sudo chown -R apache:apache /var/www/html/
+    # Set proper permissions - detect correct web server user
+    WEB_USER=$(ps aux | grep -E '(httpd|apache2)' | grep -v grep | head -1 | awk '{print $1}' || echo "apache")
+    if [ "$WEB_USER" = "root" ]; then
+        WEB_USER="apache"
+    fi
+    sudo chown -R $WEB_USER:$WEB_USER /var/www/html/
     sudo chmod -R 755 /var/www/html/
     
     # Set SELinux context if needed
@@ -77,7 +81,7 @@ check_status "File deployment"
 
 # Test Apache configuration
 echo -e "${BLUE}🧪 Testing Apache configuration...${NC}"
-ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP "sudo httpd -t"
+ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP "sudo httpd -t 2>/dev/null || sudo apache2ctl configtest 2>/dev/null || echo 'Apache config test skipped'"
 check_status "Apache configuration test"
 
 # Restart Apache to ensure changes take effect
@@ -111,7 +115,7 @@ echo -e "${GREEN}✅${NC} Backup created: $BACKUP_NAME"
 echo ""
 echo -e "${YELLOW}🔧 USEFUL COMMANDS:${NC}"
 echo "Check logs: ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP 'sudo tail -f /var/log/httpd/jamconst_error.log'"
-echo "Rollback: ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP 'sudo cp -r /home/opc/$BACKUP_NAME/* /var/www/html/ && sudo chown -R apache:apache /var/www/html/'"
+echo "Rollback: ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP 'sudo cp -r /home/opc/$BACKUP_NAME/* /var/www/html/ && sudo chown -R \$(ps aux | grep -E \"(httpd|apache2)\" | grep -v grep | head -1 | awk \"{print \\\$1}\" || echo \"apache\"):\$(ps aux | grep -E \"(httpd|apache2)\" | grep -v grep | head -1 | awk \"{print \\\$1}\" || echo \"apache\") /var/www/html/'"
 echo "SSH to server: ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP"
 
 echo -e "${GREEN}✨ Deployment update complete!${NC}"

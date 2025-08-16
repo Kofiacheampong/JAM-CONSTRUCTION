@@ -1,0 +1,77 @@
+name: Deploy JAM Construction Website
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+        
+    - name: Deploy to server
+      env:
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+      run: |
+        # Upload files to server
+        rsync -avz --progress --exclude='.git' --exclude='.github' --exclude='*.sh' --exclude='*.md' --exclude='node_modules' -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" ./ $SERVER_USER@$SERVER_IP:/home/opc/website-update/
+        
+        # Deploy on server
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
+          # Create backup
+          BACKUP_NAME="website-backup-$(date +%Y%m%d-%H%M%S)"
+          sudo cp -r /var/www/html /home/opc/$BACKUP_NAME
+          sudo chown -R opc:opc /home/opc/$BACKUP_NAME
+          
+          # Deploy new files
+          sudo cp -r /home/opc/website-update/* /var/www/html/
+          
+          # Set proper permissions
+          WEB_USER=$(ps aux | grep -E '(httpd|apache2)' | grep -v grep | head -1 | awk '{print $1}' || echo "apache")
+          if [ "$WEB_USER" = "root" ]; then
+            WEB_USER="apache"
+          fi
+          sudo chown -R $WEB_USER:$WEB_USER /var/www/html/
+          sudo chmod -R 755 /var/www/html/
+          
+          # Set SELinux context if needed
+          if command -v restorecon >/dev/null 2>&1; then
+            sudo restorecon -Rv /var/www/html/
+          fi
+          
+          # Clean up
+          rm -rf /home/opc/website-update
+          
+          # Restart Apache
+          sudo systemctl reload httpd
+          
+          echo "Deployment completed successfully!"
+          echo "Backup created: $BACKUP_NAME"
+        EOF
+        
+    - name: Verify deployment
+      env:
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+      run: |
+        # Test if site is responding
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://$SERVER_IP)
+        if [ "$RESPONSE" = "200" ]; then
+          echo "✅ Website is responding correctly (HTTP $RESPONSE)"
+        else
+          echo "❌ Website returned HTTP $RESPONSE"
+          exit 1
+        fi
