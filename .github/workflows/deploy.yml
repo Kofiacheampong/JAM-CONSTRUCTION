@@ -1,5 +1,4 @@
 name: Deploy JAM Construction Website
-
 on:
   push:
     branches: [ main ]
@@ -7,86 +6,91 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/Jam_Construction_key
-        chmod 600 ~/.ssh/Jam_Construction_key
-        chmod 700 ~/.ssh
+      - name: Checkout code
+        uses: actions/checkout@v4
         
-        # Debug: Check if key was written correctly (without revealing content)
-        echo "SSH key file size: $(wc -c < ~/.ssh/Jam_Construction_key) bytes"
-        echo "SSH key starts with: $(head -1 ~/.ssh/Jam_Construction_key)"
-        
-        # Add server to known hosts
-        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-        echo "Known hosts added for ${{ secrets.SERVER_IP }}"
-        
-    - name: Deploy to server
-      env:
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-      run: |
-        # Debug: Check if secrets are available
-        echo "SERVER_IP is set: $([[ -n '$SERVER_IP' ]] && echo 'YES' || echo 'NO')"
-        echo "SERVER_USER is set: $([[ -n '$SERVER_USER' ]] && echo 'YES' || echo 'NO')"
-        
-        echo "🚀 Starting deployment to $SERVER_USER@$SERVER_IP"
-        
-        # Test SSH connection with verbose output
-        ssh -vvv -i ~/.ssh/Jam_Construction_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 $SERVER_USER@$SERVER_IP 'echo "✅ SSH connection successful"'
-        
-        # Upload files to server
-        echo "📤 Uploading files..."
-        rsync -avz --progress --exclude='.git' --exclude='.github' --exclude='*.sh' --exclude='*.md' --exclude='node_modules' -e "ssh -i ~/.ssh/Jam_Construction_key -o StrictHostKeyChecking=no" ./ $SERVER_USER@$SERVER_IP:/home/opc/website-update/
-        
-        # Deploy on server
-        ssh -i ~/.ssh/Jam_Construction_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
-          # Create backup
-          BACKUP_NAME="website-backup-$(date +%Y%m%d-%H%M%S)"
-          sudo cp -r /var/www/html /home/opc/$BACKUP_NAME
-          sudo chown -R opc:opc /home/opc/$BACKUP_NAME
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          # Write the key with proper line endings
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/Jam_Construction_key
+          chmod 600 ~/.ssh/Jam_Construction_key
+          chmod 700 ~/.ssh
           
-          # Deploy new files
-          sudo cp -r /home/opc/website-update/* /var/www/html/
-          
-          # Set proper permissions
-          WEB_USER=$(ps aux | grep -E '(httpd|apache2)' | grep -v grep | head -1 | awk '{print $1}' || echo "apache")
-          if [ "$WEB_USER" = "root" ]; then
-            WEB_USER="apache"
-          fi
-          sudo chown -R $WEB_USER:$WEB_USER /var/www/html/
-          sudo chmod -R 755 /var/www/html/
-          
-          # Set SELinux context if needed
-          if command -v restorecon >/dev/null 2>&1; then
-            sudo restorecon -Rv /var/www/html/
+          # Validate the key format
+          if ! ssh-keygen -l -f ~/.ssh/Jam_Construction_key >/dev/null 2>&1; then
+            echo "❌ SSH key validation failed"
+            echo "Key file size: $(wc -c < ~/.ssh/Jam_Construction_key) bytes"
+            echo "Key starts with: $(head -1 ~/.ssh/Jam_Construction_key)"
+            echo "Key ends with: $(tail -1 ~/.ssh/Jam_Construction_key)"
+            exit 1
+          else
+            echo "✅ SSH key validation passed"
           fi
           
-          # Clean up
-          rm -rf /home/opc/website-update
+          # Add server to known hosts
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          echo "Known hosts added for ${{ secrets.SERVER_IP }}"
+
+      - name: Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          # Debug: Check if secrets are available
+          echo "SERVER_IP is set: $([[ -n '$SERVER_IP' ]] && echo 'YES' || echo 'NO')"
+          echo "SERVER_USER is set: $([[ -n '$SERVER_USER' ]] && echo 'YES' || echo 'NO')"
+          echo "🚀 Starting deployment to $SERVER_USER@$SERVER_IP"
           
-          # Restart Apache
-          sudo systemctl reload httpd
+          # Test SSH connection with less verbose output first
+          ssh -i ~/.ssh/Jam_Construction_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 $SERVER_USER@$SERVER_IP 'echo "✅ SSH connection successful"'
           
-          echo "Deployment completed successfully!"
-          echo "Backup created: $BACKUP_NAME"
-        EOF
-        
-    - name: Verify deployment
-      env:
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-      run: |
-        # Test if site is responding
-        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://$SERVER_IP)
-        if [ "$RESPONSE" = "200" ]; then
-          echo "✅ Website is responding correctly (HTTP $RESPONSE)"
-        else
-          echo "❌ Website returned HTTP $RESPONSE"
-          exit 1
-        fi
+          # Upload files to server
+          echo "📤 Uploading files..."
+          rsync -avz --progress --exclude='.git' --exclude='.github' --exclude='*.sh' --exclude='*.md' --exclude='node_modules' -e "ssh -i ~/.ssh/Jam_Construction_key -o StrictHostKeyChecking=no" ./ $SERVER_USER@$SERVER_IP:/home/opc/website-update/
+          
+          # Deploy on server
+          ssh -i ~/.ssh/Jam_Construction_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
+            # Create backup
+            BACKUP_NAME="website-backup-$(date +%Y%m%d-%H%M%S)"
+            sudo cp -r /var/www/html /home/opc/$BACKUP_NAME
+            sudo chown -R opc:opc /home/opc/$BACKUP_NAME
+            
+            # Deploy new files
+            sudo cp -r /home/opc/website-update/* /var/www/html/
+            
+            # Set proper permissions
+            WEB_USER=$(ps aux | grep -E '(httpd|apache2)' | grep -v grep | head -1 | awk '{print $1}' || echo "apache")
+            if [ "$WEB_USER" = "root" ]; then
+              WEB_USER="apache"
+            fi
+            sudo chown -R $WEB_USER:$WEB_USER /var/www/html/
+            sudo chmod -R 755 /var/www/html/
+            
+            # Set SELinux context if needed
+            if command -v restorecon >/dev/null 2>&1; then
+              sudo restorecon -Rv /var/www/html/
+            fi
+            
+            # Clean up
+            rm -rf /home/opc/website-update
+            
+            # Restart Apache
+            sudo systemctl reload httpd
+            echo "Deployment completed successfully!"
+            echo "Backup created: $BACKUP_NAME"
+          EOF
+
+      - name: Verify deployment
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          # Test if site is responding
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://$SERVER_IP)
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Website is responding correctly (HTTP $RESPONSE)"
+          else
+            echo "❌ Website returned HTTP $RESPONSE"
+            exit 1
+          fi
