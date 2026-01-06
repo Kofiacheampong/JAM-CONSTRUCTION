@@ -83,51 +83,64 @@
     }
     
     function handleFormSubmit(e) {
-        e.preventDefault();
-        
         const form = e.target;
         const formData = new FormData(form);
-        
+
         // Validate all fields
         let isValid = true;
         const requiredFields = form.querySelectorAll('[required]');
-        
+
         requiredFields.forEach(field => {
             if (!validateField(field)) {
                 isValid = false;
             }
         });
-        
-        if (isValid) {
-            // Show loading state
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalText = submitButton.textContent;
-            submitButton.textContent = 'Sending...';
-            submitButton.disabled = true;
-            
-            // Simulate form submission (replace with actual API call)
-            setTimeout(() => {
-                if (form.id === 'quote-form') {
-                    handleQuoteFormSubmission(formData);
-                } else if (form.id === 'contact-form') {
-                    handleContactFormSubmission(formData);
-                }
-                
-                // Reset button
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-                
-                // Reset form
-                form.reset();
-                clearAllFieldErrors(form);
-                
-                // Show success message
-                showNotification('Thank you! We\'ll get back to you within 24 hours.', 'success');
-                
-                // Track conversion
-                trackLeadGeneration(form.id, formData);
-                
-            }, 2000);
+
+        // Prevent submission if validation fails
+        if (!isValid) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Populate hidden tracking fields before submission
+        populateTrackingFields(form);
+
+        // Show loading state
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Sending...';
+        submitButton.disabled = true;
+
+        // Store lead data locally for backup
+        if (form.id === 'quote-form') {
+            handleQuoteFormSubmission(formData);
+        } else if (form.id === 'contact-form') {
+            handleContactFormSubmission(formData);
+        }
+
+        // Track conversion
+        trackLeadGeneration(form.id, formData);
+
+        // Allow form to submit naturally to Formspree
+        // Formspree will handle the redirect to thank-you page
+        return true;
+    }
+
+    function populateTrackingFields(form) {
+        // Populate lead source from URL parameters or referrer
+        const urlParams = new URLSearchParams(window.location.search);
+        const leadSourceField = form.querySelector('#lead-source');
+        const leadMediumField = form.querySelector('#lead-medium');
+        const pageUrlField = form.querySelector('#page-url');
+
+        if (leadSourceField) {
+            leadSourceField.value = urlParams.get('utm_source') || document.referrer || 'direct';
+        }
+        if (leadMediumField) {
+            leadMediumField.value = urlParams.get('utm_medium') || 'organic';
+        }
+        if (pageUrlField) {
+            pageUrlField.value = window.location.href;
         }
     }
     
@@ -285,6 +298,12 @@
     
     // Contact Tracking (Phone, Email clicks)
     function setupContactTracking() {
+        // Pre-populate tracking fields for all forms on page load
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            populateTrackingFields(form);
+        });
+
         // Track phone number clicks
         const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
         phoneLinks.forEach(link => {
@@ -296,7 +315,7 @@
                 }
             });
         });
-        
+
         // Track email clicks
         const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
         emailLinks.forEach(link => {
@@ -312,7 +331,7 @@
     
     // Intersection Observer for Animations
     function setupIntersectionObserver() {
-        const animatedElements = document.querySelectorAll('.service-card, .feature, .stat');
+        const animatedElements = document.querySelectorAll('.service-card, .feature, .stat, .testimonial-card');
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {

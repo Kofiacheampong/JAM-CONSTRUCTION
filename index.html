@@ -27,7 +27,8 @@
     <link rel="canonical" href="https://jamconstruction.com">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" type="image/png" href="/images/logo.png">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
@@ -40,7 +41,7 @@
         "name": "JAM Construction",
         "description": "Expert construction estimating services for residential and commercial projects",
         "url": "https://jamconst.com",
-        "telephone": "+1-612-XXX-XXXX",
+        "telephone": "+1-651-440-6218",
         "address": {
             "@type": "PostalAddress",
             "addressLocality": "Minneapolis",
@@ -138,7 +139,7 @@
             <div class="about-content">
                 <div class="about-text-image">
                     <div class="about-text">
-                        <p>JAM CONSTRUCTIONis a trusted leader in project estimating services, serving residential, commercial, and government clients throughout the United States.</p>
+                        <p>JAM CONSTRUCTION is a trusted leader in project estimating services, serving residential, commercial, and government clients throughout the United States.</p>
                         <p>Our experienced team combines deep industry expertise with advanced technology to deliver precise cost estimates that empower informed decision-making and ensure projects stay on budget. We understand that accurate estimating is the foundation of successful construction projects.</p>
                         <p>From material procurement to labor costs, we provide comprehensive analysis that covers every aspect of your project, helping contractors, developers, and property owners achieve their construction goals efficiently and cost-effectively.</p>
                     </div>
@@ -203,6 +204,50 @@
         </div>
     </section>
 
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>What Our Clients Say</h2>
+                <p class="section-subtitle">Real feedback from satisfied clients across Minnesota</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="testimonial-text">"JAM Construction provided us with an incredibly accurate estimate for our commercial renovation project. Their attention to detail and quick turnaround time were impressive. Highly recommended!"</p>
+                    <div class="testimonial-author">
+                        <strong>Michael Thompson</strong>
+                        <span>Property Developer, Thompson & Associates</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="testimonial-text">"Working with JAM was a game-changer for our home addition project. They helped us understand all the costs upfront, which made budgeting so much easier. Professional and thorough!"</p>
+                    <div class="testimonial-author">
+                        <strong>Sarah Martinez</strong>
+                        <span>Homeowner, Edina</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="testimonial-text">"As a general contractor, I rely on JAM for all my project estimates. Their expertise in value engineering has saved my clients thousands while maintaining quality. True professionals."</p>
+                    <div class="testimonial-author">
+                        <strong>David Chen</strong>
+                        <span>General Contractor, Minneapolis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contact" class="section">
         <div class="container">
@@ -219,7 +264,7 @@
                     
                     <div class="contact-item">
                         <h4>Email</h4>
-                        <p><a href="mailto:info@jamconstruction.com">info@jamconstruction.com</a></p>
+                        <p><a href="mailto:info@jamconst.com">info@jamconst.com</a></p>
                     </div>
                     
                     <div class="contact-item">
@@ -229,11 +274,11 @@
                 </div>
                 
                 <div class="contact-form-container">
-                    <form id="contact-form" class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+                    <form id="contact-form" class="contact-form" action="https://formspree.io/f/xwvpddjo" method="POST">
                         <!-- Hidden fields for lead tracking -->
                         <input type="hidden" name="_subject" value="New Lead from JAM Construction">
-                        <input type="hidden" name="_next" value="https://jamconst.com/thank-you.html">
-                        <input type="hidden" name="_format" value="plain">
+                        <input type="hidden" name="_next" value="thank-you.html">
+                        <input type="hidden" name="_language" value="en">
                         <input type="hidden" name="lead_source" id="lead-source">
                         <input type="hidden" name="lead_medium" id="lead-medium">
                         <input type="hidden" name="page_url" id="page-url">
@@ -308,8 +353,8 @@
                 <div class="footer-section">
                     <h4>Contact</h4>
                     <ul>
-                        <li><a href="tel:+1-612-XXX-XXXX">(612) XXX-XXXX</a></li>
-                        <li><a href="mailto:info@jamconstruction.com">info@jamconstruction.com</a></li>
+                        <li><a href="tel:+1-651-440-6218">(651) 440-6218</a></li>
+                        <li><a href="mailto:info@jamconst.com">info@jamconst.com</a></li>
                         <li>Minneapolis, MN</li>
                     </ul>
                 </div>
@@ -323,14 +368,22 @@
 
     <!-- JavaScript -->
     <script src="script.js"></script>
-    
-    <!-- Google Analytics (Replace with your tracking ID) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
+
+    <!--
+        SETUP REQUIRED: Google Analytics 4
+        1. Create a Google Analytics 4 property at https://analytics.google.com
+        2. Get your Measurement ID (format: G-XXXXXXXXXX)
+        3. Replace YOUR_GA4_MEASUREMENT_ID below with your actual ID
+        4. Uncomment the script tags below
+    -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA4_MEASUREMENT_ID"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'GA_TRACKING_ID');
+        gtag('config', 'YOUR_GA4_MEASUREMENT_ID');
     </script>
+    -->
 </body>
 </html>

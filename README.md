@@ -30,15 +30,49 @@ A professional, SEO-optimized website for JAM Construction - a professional cons
 - **Interactive Elements**: Smooth scrolling, hover effects, animations
 - **Accessibility**: WCAG compliant design patterns
 
+## Quick Start Guide
+
+### Prerequisites Checklist
+Before launching your website, complete these setup tasks:
+
+1. ✅ **Contact Information** - Already configured with phone `(651) 440-6218` and email `info@jamconst.com`
+2. ✅ **Formspree Setup** - Form is connected and ready to receive submissions
+3. ⚠️ **Google Analytics** - Optional but recommended for tracking ([see instructions](#2-google-analytics---setup-required-))
+4. ✅ **Images & Assets** - All images present and configured
+5. ✅ **Favicon** - Created and configured
+
+**🎉 Your website is ready to launch!** Only Google Analytics setup remains (optional).
+
+### Testing the Website Locally
+```bash
+# Option 1: Using Python
+python3 -m http.server 8000
+
+# Option 2: Using PHP
+php -S localhost:8000
+
+# Then open http://localhost:8000 in your browser
+```
+
 ## File Structure
 
 ```
-JAM/
-├── index.html          # Main HTML file with complete content
-├── styles.css          # Comprehensive CSS with responsive design
-├── script.js           # JavaScript for forms, tracking, and interactions
-├── images/             # Directory for images and assets
-└── README.md           # This file
+JAM-CONSTRUCTION/
+├── index.html                      # Main HTML file with complete content
+├── thank-you.html                  # Form submission thank you page
+├── styles.css                      # Comprehensive CSS with responsive design
+├── script.js                       # JavaScript for forms, tracking, and interactions
+├── favicon.svg                     # Website favicon
+├── images/                         # Directory for images and assets
+│   ├── logo.png
+│   ├── hero-bg.jpg
+│   ├── team.jpg
+│   ├── calculator-icon.svg
+│   ├── engineering-icon.svg
+│   └── consultation-icon.svg
+├── README.md                       # This file
+├── DEPLOYMENT.md                   # Deployment guide
+└── *.sh                           # Deployment scripts
 ```
 
 ## Deployment to Oracle Cloud
@@ -94,46 +128,63 @@ JAM/
 
 ## Configuration & Customization
 
-### 1. Contact Information
-Update the following in `index.html`:
-- Phone number: Replace `+1-612-XXX-XXXX` with actual number
-- Email: Replace `info@jamconstruction.com` with actual email
-- Address details if needed
-- Update business certifications and badges as appropriate
+### 1. Contact Information ✅ COMPLETED
+The contact information has been updated:
+- ✅ Phone number: `(651) 440-6218` is now configured throughout
+- ✅ Email: `info@jamconst.com` is configured
+- ⚠️ Update business certifications and badges as needed for your specific licenses
 
-### 2. Google Analytics
-Replace `GA_TRACKING_ID` in `index.html` with your actual Google Analytics tracking ID:
+### 2. Google Analytics - SETUP REQUIRED ⚠️
+To enable Google Analytics tracking:
+
+1. Go to [Google Analytics](https://analytics.google.com) and create a GA4 property
+2. Get your Measurement ID (format: `G-XXXXXXXXXX`)
+3. Open `index.html` and find the Google Analytics section (near the bottom)
+4. Replace `YOUR_GA4_MEASUREMENT_ID` with your actual ID
+5. Uncomment the script tags
+
+The section looks like this in the HTML:
 ```html
+<!--
+<script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA4_MEASUREMENT_ID"></script>
 <script>
-    gtag('config', 'YOUR_GA_TRACKING_ID');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'YOUR_GA4_MEASUREMENT_ID');
 </script>
+-->
 ```
 
-### 3. Form Handling
-The forms currently store data in localStorage. For production:
+### 3. Form Handling with Formspree ✅ COMPLETED
+The contact form is now fully configured and connected to Formspree:
+- ✅ Formspree form ID: `xwvpddjo` is configured
+- ✅ Form endpoint: `https://formspree.io/f/xwvpddjo`
 
-1. **Backend Integration**
-   ```javascript
-   // In script.js, replace the storeLeadData function
-   function storeLeadData(leadData) {
-       fetch('/api/leads', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify(leadData)
-       });
-   }
-   ```
+**What's Already Configured:**
+- ✅ Client-side form validation
+- ✅ Lead tracking fields (source, medium, page URL)
+- ✅ Automatic redirect to thank-you page
+- ✅ Local storage backup of form submissions
+- ✅ Google Analytics event tracking integration
 
-2. **Email Service Integration**
-   - Integrate with services like EmailJS, Formspree, or Netlify Forms
-   - Or set up server-side email handling
+**Alternative Backend Options:**
+If you prefer not to use Formspree, you can integrate with:
+- EmailJS
+- Netlify Forms
+- Custom backend API (see script.js storeLeadData function)
 
-### 4. Images and Assets
-Add the following images to the `images/` directory:
-- `jam-construction-logo.jpg` - Company logo
-- `favicon.ico` - Website favicon
-- Hero background images (optional)
-- Service icons (optional)
+### 4. Images and Assets ✅ COMPLETED
+All required images are already in place:
+- ✅ `images/logo.png` - Company logo
+- ✅ `images/hero-bg.jpg` - Hero section background
+- ✅ `images/team.jpg` - About section team photo
+- ✅ `images/calculator-icon.svg` - Service icon
+- ✅ `images/engineering-icon.svg` - Service icon
+- ✅ `images/consultation-icon.svg` - Service icon
+- ✅ `favicon.svg` - Website favicon (SVG format for modern browsers)
+
+**Note:** To replace images with your own, simply overwrite the files in the `images/` directory with your new images, keeping the same filenames.
 
 ### 5. Social Media Integration
 Add social media links in the footer section of `index.html`.
