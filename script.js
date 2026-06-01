@@ -26,16 +26,17 @@
         
         if (mobileToggle && navMenu) {
             mobileToggle.addEventListener('click', function() {
-                navMenu.classList.toggle('active');
+                const isOpen = navMenu.classList.toggle('active');
                 mobileToggle.classList.toggle('active');
+                mobileToggle.setAttribute('aria-expanded', isOpen);
             });
-            
-            // Close menu when clicking on nav links (mobile)
+
             const navLinks = document.querySelectorAll('.nav-menu a');
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
                     navMenu.classList.remove('active');
                     mobileToggle.classList.remove('active');
+                    mobileToggle.setAttribute('aria-expanded', 'false');
                 });
             });
         }
@@ -111,12 +112,7 @@
         submitButton.textContent = 'Sending...';
         submitButton.disabled = true;
 
-        // Store lead data locally for backup
-        if (form.id === 'quote-form') {
-            handleQuoteFormSubmission(formData);
-        } else if (form.id === 'contact-form') {
-            handleContactFormSubmission(formData);
-        }
+        handleFormSubmission(formData);
 
         // Track conversion
         trackLeadGeneration(form.id, formData);
@@ -197,57 +193,21 @@
         }
     }
     
-    function clearAllFieldErrors(form) {
-        const fieldGroups = form.querySelectorAll('.form-group');
-        fieldGroups.forEach(group => {
-            group.classList.remove('error', 'success');
-            const errorMessage = group.querySelector('.error-message');
-            if (errorMessage) {
-                errorMessage.textContent = '';
-            }
-        });
-    }
-    
-    // Lead Generation Tracking
-    function handleQuoteFormSubmission(formData) {
+    function handleFormSubmission(formData) {
         const leadData = {
-            type: 'quote_request',
+            type: 'estimate_request',
             name: formData.get('name'),
             email: formData.get('email'),
             phone: formData.get('phone'),
-            projectType: formData.get('project-type'),
-            budget: formData.get('budget'),
-            timeline: formData.get('timeline'),
+            projectType: formData.get('project_type'),
+            budget: formData.get('budget_range'),
             message: formData.get('message'),
             timestamp: new Date().toISOString(),
             source: 'website',
             page: window.location.pathname
         };
-        
-        // Store lead data (replace with actual database/API call)
+
         storeLeadData(leadData);
-        
-        // Send notification email (replace with actual email service)
-        console.log('Quote Request Submitted:', leadData);
-    }
-    
-    function handleContactFormSubmission(formData) {
-        const leadData = {
-            type: 'contact_inquiry',
-            name: formData.get('name'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            subject: formData.get('subject'),
-            message: formData.get('message'),
-            timestamp: new Date().toISOString(),
-            source: 'website',
-            page: window.location.pathname
-        };
-        
-        // Store lead data
-        storeLeadData(leadData);
-        
-        console.log('Contact Form Submitted:', leadData);
     }
     
     function storeLeadData(leadData) {
@@ -265,20 +225,18 @@
     }
     
     function trackLeadGeneration(formId, formData) {
-        // Google Analytics Event Tracking
         if (typeof gtag !== 'undefined') {
             gtag('event', 'lead_generation', {
                 'form_id': formId,
-                'project_type': formData.get('project-type') || 'contact',
-                'lead_value': calculateLeadValue(formData.get('budget'))
+                'project_type': formData.get('project_type') || 'unknown',
+                'lead_value': calculateLeadValue(formData.get('budget_range'))
             });
         }
-        
-        // Facebook Pixel Event (if using Facebook Ads)
+
         if (typeof fbq !== 'undefined') {
             fbq('track', 'Lead', {
-                content_name: formId === 'quote-form' ? 'Quote Request' : 'Contact Form',
-                value: calculateLeadValue(formData.get('budget')),
+                content_name: 'Estimate Request',
+                value: calculateLeadValue(formData.get('budget_range')),
                 currency: 'USD'
             });
         }
@@ -331,7 +289,7 @@
     
     // Intersection Observer for Animations
     function setupIntersectionObserver() {
-        const animatedElements = document.querySelectorAll('.service-card, .feature, .stat, .testimonial-card');
+        const animatedElements = document.querySelectorAll('.service-card, .stat, .testimonial-card');
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -419,135 +377,10 @@
         }, 4000);
     }
     
-    // Utility Functions
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-    
-    // Preload Critical Images
-    function preloadImages() {
-        const images = [
-            // Add your critical images here
-        ];
-        
-        images.forEach(src => {
-            const img = new Image();
-            img.src = src;
-        });
-    }
-    
-    // Initialize preloading
-    preloadImages();
-    
-    // Export functions for testing (if needed)
     window.JAMConstruction = {
         validateField,
         showNotification,
         trackLeadGeneration
     };
-    
+
 })();
-
-// Additional CSS for scroll-to-top button and notifications
-const additionalStyles = `
-.scroll-top-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 18px;
-    cursor: pointer;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.scroll-top-btn.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-.scroll-top-btn:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-2px);
-}
-
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 16px 24px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.3s ease;
-    z-index: 1001;
-    max-width: 400px;
-}
-
-.notification.show {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.notification-success {
-    background-color: var(--success-color);
-}
-
-.notification-error {
-    background-color: var(--error-color);
-}
-
-.notification-info {
-    background-color: var(--primary-color);
-}
-
-
-@media (max-width: 768px) {
-    .nav-menu.active {
-        display: flex;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--primary-color);
-        flex-direction: column;
-        padding: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .mobile-menu-toggle.active span:nth-child(1) {
-        transform: rotate(45deg) translate(5px, 5px);
-    }
-    
-    .mobile-menu-toggle.active span:nth-child(2) {
-        opacity: 0;
-    }
-    
-    .mobile-menu-toggle.active span:nth-child(3) {
-        transform: rotate(-45deg) translate(7px, -6px);
-    }
-}
-`;
-
-// Inject additional styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);
